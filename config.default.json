@@ -1,4 +1,4 @@
 {
 	"token": "",
-	"prefix": "+"
+	"timeout": 3000
 }

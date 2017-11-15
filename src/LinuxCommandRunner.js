@@ -1,5 +1,6 @@
 const docker = new require('dockerode')()
 const stream = require('stream')
+const config = require('../config.json')
 
 class Stdout extends stream.Writable {
 	constructor() {
@@ -90,12 +91,12 @@ class LinuxCommandRunner {
 							if (killedFlag) return
 							killedFlag = true
 							console.warn('Container reached timeout. Killing...')
-							initialmessage.edit('Timeout (3000ms) reached, canceling. :(')
+							initialmessage.edit(`Timeout (${config.timeout}ms) reached, canceling. :(`)
 
 							container.kill(function(err, data) {
 								if (err) console.error('Killing failed: ' + err)
 							})
-						}, 2000)
+						}, config.timeout)
 					})
 			} catch (error) {
 				message.channel.send('**Error**: ```\n' + error + '```')
