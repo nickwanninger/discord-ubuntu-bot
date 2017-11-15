@@ -31,6 +31,8 @@ class LinuxCommandRunner {
 	async run(client, message) {
 		const command = message.content.slice(1).trim()
 		const start = Date.now()
+
+		console.log(`Running command: ${command}`)
 		message.channel.send('Spinning up...').then(initialmessage => {
 			try {
 				const output_stream = new Stdout()
@@ -40,8 +42,7 @@ class LinuxCommandRunner {
 				const outStream = new Stdout()
 				const errStream = new Stdout()
 
-				docker.run('ubuntu', command.split(' '), [ outStream, errStream ], { Tty: false }, function(err, data, container) {
-						console.log(err)
+				docker.run('ubuntu-custom', command.split(' '), [ outStream, errStream ], { Tty: false }, function(err, data, container) {
 						clearTimeout(killingTimeout)
 						if (err) {
 							initialmessage.edit('Something went wrong!')
