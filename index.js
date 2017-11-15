@@ -1,9 +1,5 @@
 // Load up the discord.js library
 const Discord = require('discord.js')
-
-const Command = require('./Command.js')
-const CommandHandler = require('./CommandHandler.js')
-
 const axios = require('axios')
 
 const giphykey = 'O2NQDVrMXIx4cELfE2ndGQzfg6LzET1B'
