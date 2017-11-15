@@ -40,19 +40,23 @@ class LinuxCommandRunner {
 				const outStream = new Stdout()
 				const errStream = new Stdout()
 
-				docker
-					.run('ubuntu', [ 'yes' ], [ outStream, errStream ], { Tty: false }, function(err, data, container) {
-						if (!killedFlag) {
-							clearTimeout(killingTimeout)
-
-							const stdout = outStream.getContent()
-
-							initialmessage.edit('Ran `' + command + '` in ' + (Date.now() - start) + 'ms')
-							const splits = chunk(stdout, 1990)
-
-							splits.forEach(s => {
-								message.channel.send('```' + s + '```')
-							})
+				docker.run('ubuntu', command.split(' '), [ outStream, errStream ], { Tty: false }, function(err, data, container) {
+						console.log(err)
+						clearTimeout(killingTimeout)
+						if (err) {
+							initialmessage.edit('Something went wrong!')
+							message.channel.send("```" + JSON.stringify(err, null, 2) + "```")
+						} else {
+							if (!killedFlag) {
+								const stdout = outStream.getContent()
+	
+								initialmessage.edit('Ran `' + command + '` in ' + (Date.now() - start) + 'ms')
+								const splits = chunk(stdout, 1990)
+	
+								splits.forEach(s => {
+									message.channel.send('```' + s + '```')
+								})
+							}
 						}
 					})
 					.on('container', function(container) {
@@ -69,7 +73,7 @@ class LinuxCommandRunner {
 							if (killedFlag) return
 							killedFlag = true
 							console.warn('Container reached timeout. Killing...')
-							initialmessage.edit('Timeout reached, canceling... :(')
+							initialmessage.edit('Timeout (3000ms) reached, canceling. :(')
 
 							container.kill(function(err, data) {
 								if (err) console.error('Killing failed: ' + err)
