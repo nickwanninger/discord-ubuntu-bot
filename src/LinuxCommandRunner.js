@@ -54,6 +54,7 @@ class LinuxCommandRunner {
 							if (!killedFlag) {
 								// grab the current text from stdout from the sdtOutStream
 								const stdout = outStream.getContent()
+								const stderr = errStream.getContent()
 								// Change the initial message to display the new status
 								// and tell the user that the command ran as well as how long it took.
 								initialmessage.edit({embed: {
@@ -70,7 +71,7 @@ class LinuxCommandRunner {
 								  }
 								})
 
-								const msg = new PagniatedMessage(stdout, message)
+								const msg = new PagniatedMessage(stdout, stderr, message)
 							}
 						}
 					})

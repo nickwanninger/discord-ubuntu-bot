@@ -1,25 +1,23 @@
 const EventEmitter = require('events');
 
 class PagniatedMessage extends EventEmitter {
-    constructor(stdout, cmd_message) {
+    constructor(stdout, stderr, cmd_message) {
         super()
         this.stdout = stdout
+        this.stderr = stderr
         this.cmd_message = cmd_message
         this.chunks = this.chunkStdout()
         this.max_page = this.chunks.length - 1
         this.min_page = 0
         this.current_page = 0
         this.sendInitialMessage()
-        
         this.message = null
     }
 
     chunkStdout() {
         const chunks = []
         const max_size = 512
-        // I then loop over and chunk it into seperate bits
         for (var i = 0, charsLength = this.stdout.length; i < charsLength; i += max_size) {
-        // push to the chunks array.
             chunks.push(this.stdout.substring(i, i + max_size))
         }
         return chunks;
@@ -30,9 +28,20 @@ class PagniatedMessage extends EventEmitter {
     }
 
     getCurrentPageData() {
-        const header = `${this.current_page + 1}/${this.max_page + 1}`
-        const body = '```' + this.chunks[this.current_page] + '```'
-        return header + body
+        const pageinfo = `${this.current_page + 1}/${this.max_page + 1}`
+        const stdout = '```' + this.chunks[this.current_page] + '```'
+        return {embed: {
+            color: 3447003,
+            fields: [{
+                name: "**Output**",
+                value: stdout
+              }
+            ],
+            footer: {
+              text: "Page " + pageinfo
+            }
+          }
+        }
     }
 
     nextPage() {
@@ -78,7 +87,7 @@ class PagniatedMessage extends EventEmitter {
             await this.message.clearReactions()
             await this.message.react("⏮")
             await this.message.react("⬅")
-            await this.message.react('➡')
+            await this.message.react("➡")
             await this.message.react("⏭")
             resolve()
         })
