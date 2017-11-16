@@ -1,6 +1,7 @@
 const docker = new require('dockerode')()
 const stream = require('stream')
 const config = require('../config.json')
+const Discord = require("discord.js")
 
 class Stdout extends stream.Writable {
 	constructor() {
@@ -39,6 +40,7 @@ class LinuxCommandRunner {
 						data,
 						container
 					) {
+						console.log(data)
 						// make sure to stop the timeout function that would run and kill the container.
 						clearTimeout(killingTimeout)
 						// Check if there is an error or not
@@ -56,7 +58,19 @@ class LinuxCommandRunner {
 								const stdout = outStream.getContent()
 								// Change the initial message to display the new status
 								// and tell the user that the command ran as well as how long it took.
-								initialmessage.edit('Ran `' + command + '` in ' + (Date.now() - start) + 'ms')
+								initialmessage.edit({embed: {
+									color: 3447003,
+									title: '`' + command + '`',
+									description: 'Time: ' + (Date.now() - start) + 'ms',
+									fields: [
+									],
+									timestamp: new Date(),
+									footer: {
+									  icon_url: client.user.avatarURL,
+									  text: "Exit Code: " + data.StatusCode
+									}
+								  }
+								})
 								// This one is a little tricky.
 								// discord only allows messages with a max size of 2000 characters
 								// so I need to chunk it up into smaller parts. To be safe, I'm cutting
@@ -73,7 +87,7 @@ class LinuxCommandRunner {
 								// send each part of the split
 								splits.forEach(s => {
 									message.channel.send('```' + s + '```')
-								})
+								});
 							}
 						}
 					})

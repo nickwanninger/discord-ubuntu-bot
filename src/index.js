@@ -30,7 +30,7 @@ client.on('ready', () => {
 client.on('message', async message => {
 	if (message.author.bot) return
 
-	const args = message.content.slice('$').trim().split(/ +/g)
+	const args = message.content.slice(1).trim().split(/ +/g)
 	const command = args.shift().toLowerCase()
 
 	if (message.content.indexOf('$') == 0) {
