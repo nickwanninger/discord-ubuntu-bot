@@ -2,6 +2,7 @@ const docker = new require('dockerode')()
 const stream = require('stream')
 const config = require('../config.json')
 const Discord = require("discord.js")
+const PagniatedMessage = require('./Pagination')
 
 class Stdout extends stream.Writable {
 	constructor() {
@@ -23,8 +24,6 @@ class LinuxCommandRunner {
 	async run(client, message) {
 		const command = message.content.slice(1).trim()
 		const start = Date.now()
-
-		console.log(`Running command: ${command}`)
 		message.channel.send('Spinning up...').then(initialmessage => {
 			try {
 				const output_stream = new Stdout()
@@ -40,7 +39,6 @@ class LinuxCommandRunner {
 						data,
 						container
 					) {
-						console.log(data)
 						// make sure to stop the timeout function that would run and kill the container.
 						clearTimeout(killingTimeout)
 						// Check if there is an error or not
@@ -71,23 +69,8 @@ class LinuxCommandRunner {
 									}
 								  }
 								})
-								// This one is a little tricky.
-								// discord only allows messages with a max size of 2000 characters
-								// so I need to chunk it up into smaller parts. To be safe, I'm cutting
-								// it into 1990 characters so I can include any formatting I might want
-								// Here, I define the initial values
-								const splits = []
-								const max_size = 1990
 
-								// I then loop over and chunk it into seperate bits
-								for (var i = 0, charsLength = stdout.length; i < charsLength; i += max_size) {
-									// push to the splits array.
-									splits.push(stdout.substring(i, i + max_size))
-								}
-								// send each part of the split
-								splits.forEach(s => {
-									message.channel.send('```' + s + '```')
-								});
+								const msg = new PagniatedMessage(stdout, message)
 							}
 						}
 					})
